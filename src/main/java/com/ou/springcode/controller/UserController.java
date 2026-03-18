@@ -4,9 +4,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ou.springcode.dto.UserRequest;
+import com.ou.springcode.dto.UserPatchRequest;
 import com.ou.springcode.dto.UserResponse;
 import com.ou.springcode.model.User;
 import com.ou.springcode.service.UserService;
+
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -22,9 +25,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
-
-
 @RestController
 @RequestMapping("api/users")
 public class UserController {
@@ -34,58 +34,43 @@ public class UserController {
         this.userService = userService;
     }
 
-    //GET /api/users
-    // @RequestMapping(value = "/users", method = RequestMethod.GET)
-    @GetMapping()
-    public String getMethodName(@RequestParam String param) {
-        return new String();
-    }
-    
-    public ResponseEntity<List<UserResponse>> getAllUser() {
+    /** GET /api/users - Lấy danh sách tất cả user */
+    @GetMapping
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
         List<UserResponse> users = userService.findAll();
-
         return ResponseEntity.ok(users);
     }
 
-    //GET /api/users/{id}
+    /** GET /api/users/{id} - Lấy user theo id */
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserResponse> getUser(@PathVariable Long id) {
         return userService.findById(id);
     }
 
-    //POST /api/users
-    @PostMapping()
-    public ResponseEntity<User> create(@RequestBody UserRequest request){
-        User created = null;
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    /** POST /api/users - Tạo user mới */
+    @PostMapping
+    public ResponseEntity<UserResponse> create(@Valid @RequestBody UserRequest request) {
+        return userService.create(request);
     }
 
+    /** PUT /api/users/{id} - Cập nhật toàn bộ user */
     @PutMapping("/{id}")
-    public ResponseEntity<User> update(@PathVariable Long id, @RequestBody UserRequest request){
-        User updated = null;
-
-        return ResponseEntity.ok(updated);
+    public ResponseEntity<UserResponse> update(@PathVariable Long id, @Valid @RequestBody UserRequest request) {
+        return userService.updatePut(id, request);
     }
 
+    /** PATCH /api/users/{id} - Cập nhật một phần user (cùng body với PUT) */
     @PatchMapping("/{id}")
-    public ResponseEntity<User> patch(@PathVariable Long id, @RequestBody UserRequest request){
-        User updated = null;
-
-        return ResponseEntity.ok(updated);
+    public ResponseEntity<UserResponse> patchUpdate(@PathVariable Long id,
+            @Valid @RequestBody UserPatchRequest request) {
+        return userService.update(id, request);
     }
 
-    @PostMapping("/{id}")
-    public ResponseEntity<User> updatePartial(@PathVariable Long id, @RequestBody UserRequest request){
-        User updated = null;
-
-        return ResponseEntity.ok(updated);
-    }
-
-    //DELETE /api/users
+    /** DELETE /api/users/{id} - Xóa user */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        return userService.deleteById(id) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        return userService.deleteById(id)
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.notFound().build();
     }
-    
 }
